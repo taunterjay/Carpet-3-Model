@@ -28,7 +28,7 @@ void MyRunAction::BeginOfRunAction(const G4Run* run){
 		std::ostringstream oFileName;
   
 		//oFileName << "/media/user/Elements\ SE/Read_showers/" << i << ".txt";
-		oFileName << "/home/user/Showers/Result/" << i << ".txt";
+		oFileName << "../build/Showers/" << i << ".txt";
       
 		file.open(oFileName.str ().c_str ());
   
