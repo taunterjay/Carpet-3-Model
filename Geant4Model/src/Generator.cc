@@ -38,6 +38,7 @@ void PrimaryGenerator::GeneratePrimaries(G4Event *Event){
 	std::ostringstream oFileName; //переменная имя файла
   
 	//oFileName << "/media/user/Elements\ SE/Read_showers/" << EventID << ".txt"; //Считываем название файла в переменную
+	oFileName << "/home/user/Showers/Result/" << EventID << ".txt";
 	
       
 	file.open(oFileName.str ().c_str ()); //Открываем соответствующий файл
