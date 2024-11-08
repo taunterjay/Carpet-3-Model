@@ -1,0 +1,4 @@
+/home/user/git/Carpet-3-Model/Geant4Model/build/CMakeFiles/photosensors.dir
+/home/user/git/Carpet-3-Model/Geant4Model/build/CMakeFiles/Photosensors.dir
+/home/user/git/Carpet-3-Model/Geant4Model/build/CMakeFiles/edit_cache.dir
+/home/user/git/Carpet-3-Model/Geant4Model/build/CMakeFiles/rebuild_cache.dir
