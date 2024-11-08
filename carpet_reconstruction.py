@@ -27,6 +27,7 @@ def VEM2rp(hist : np.ndarray) -> np.ndarray: # Конвертирует сигн
 #Функция ниже определяет положение оси ливня по локальному максимуму сигнала в центральном "Ковре"
 
 def neighbors(matrix, rowNumber, colNumber):
+    
     result = []
     for rowAdd in range(-1, 2):
         newRow = rowNumber + rowAdd
