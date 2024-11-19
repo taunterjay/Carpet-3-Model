@@ -7,7 +7,7 @@ import re
 def GetCarpetSignal(hist : np.ndarray) -> np.ndarray: # Достаёт из полной гистограммы отклика центральный "Ковёр"
     return hist[hist.shape[0] // 2 - 10:hist.shape[0] // 2 + 10, hist.shape[0] // 2 - 10:hist.shape[0] // 2 + 10]
 
-def VEM(hist):
+def VEM(hist : np.ndarray) -> np.ndarray: # Конвертирует сигнал в р.ч. в показания LC-преобразователей, затем - обратно в р.ч. Имитируем дискретность реальных данных.
     filt = (hist < 0.5)
     hist[filt] = 0.001
     hist = (1 + np.log(hist/8)/np.log(1.12)) // 1
@@ -17,7 +17,7 @@ def VEM(hist):
 
     return rel_p
 
-def VEM2rp(hist : np.ndarray) -> np.ndarray: # Конвертирует сигнал в р.ч. в показания LC-преобразователей, затем - обратно в р.ч. Имитируем дискретность реальных данных.  
+def VEM2rp(hist : np.ndarray) -> np.ndarray: # Конвертирует сигнал LC-преобразователей в р.ч. 
     
     rel_p = 8*1.12**(hist - 1)
     rel_p[rel_p < 8] = 0
