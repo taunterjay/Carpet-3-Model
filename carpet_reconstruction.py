@@ -156,7 +156,7 @@ def get_xy_fits(hist : np.ndarray) -> list[float]:
             
             weight : float = np.sum(row)
 
-            maxima : int = np.argwhere(row == row.max())
+            maxima = np.argwhere(row == row.max())
             centre : float = np.mean(maxima)
             
             row_weights[i] = weight
@@ -168,7 +168,7 @@ def get_xy_fits(hist : np.ndarray) -> list[float]:
             
             weight : float = np.sum(col)
             
-            maxima : int = np.argwhere(col == col.max())
+            maxima = np.argwhere(col == col.max())
             centre : float = np.mean(maxima)
             
             col_weights[i] = weight
@@ -189,11 +189,16 @@ def get_xy_fits(hist : np.ndarray) -> list[float]:
             col0 : float = (k_row*b_col + b_row) / (1-k_row*k_col)
             row0 : float = k_col*col0 + b_col
         
-        return [row0, col0]
+        if (np.abs(row0 - 10) > 11) or (np.abs(col0 - 10) > 11):
+
+            row0, col0 = [0, 0]
     
     else:
+
+        row0, col0 = np.unravel_index(hist.argmax(), hist.shape)
         
-        return [9.5, 9.5]
+    return [row0, col0]
+
 
 # Функция ниже определяет положение оси ливня (в метрах) по отклику Ковра, подаваемому на вход
 
@@ -317,9 +322,9 @@ def get_rho(signal : np.ndarray, time_array : np.ndarray = None, angles : np.nda
     x0, y0 = get_xy(signal) # Сначала вычисляется положение оси ливня
     
     if (np.any(angles)):
-    	phi, theta = angles
+        phi, theta = angles
     else:
-    	theta, phi = get_PFAWTC_theta(time_array, x0, y0) # С учётом вычисленного положения оси получаем тета, фи
+        theta, phi = get_PFAWTC_theta(time_array, x0, y0) # С учётом вычисленного положения оси получаем тета, фи
 
     rho : list = []
     r : list = [] 
