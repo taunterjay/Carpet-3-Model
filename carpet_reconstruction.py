@@ -258,6 +258,53 @@ def get_PFA_theta(t : np.ndarray) -> tuple:
     else:
         return (np.degrees(theta), nx, ny, nz)
 
+def get_angles(t : np.ndarray) -> tuple:
+
+    x : np.ndarray = np.array([-21.29, -21.63, 17.5, 21.16]) # Координаты выносных пунктов Ковра (м)
+    y : np.ndarray = np.array([21.68, -21.13, 9.34, -21.05]) # Координаты выносных пунктов Ковра (м)
+    z : float = 1700 # Примерная высота над уровнем моря для Ковра (м)
+    
+    c_norm : float = 0.3 # Скорость света, нормированная на 10**(-9), т.к. позже будем домножать на наносекунды
+    
+    x_sq : np.ndarray = x**2 # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+    y_sq : np.ndarray = y**2 # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+    xy : np.ndarray = x*y # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+    
+    x_mean : float = x.mean() # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+    y_mean : float = y.mean() # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+    x_mean_sq : float = x_mean**2 # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+    y_mean_sq : float = y_mean**2 # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+    x_sq_mean : float = x_sq.mean() # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+    y_sq_mean : float = y_sq.mean() # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+    xy_mean : float = xy.mean() # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+    xy_mean_sq : float = xy_mean**2 # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+    
+    t_mean : float = t.mean() # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+    xt_mean : float = (x*t).mean() # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+    yt_mean : float = (y*t).mean() # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+
+    xt_dif : float = xt_mean - x_mean*t_mean # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+    x2t_dif : float = x_sq_mean*t_mean - x_mean*xt_mean # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+    x2x_dif : float = x_mean_sq - x_sq_mean # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+
+    yt_dif : float = yt_mean - y_mean*t_mean # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+    y2t_dif : float = y_sq_mean*t_mean - y_mean*yt_mean # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+    y2y_dif : float = y_mean_sq - y_sq_mean # Данные необходимые для аналитического расчёта направления прихода ШАЛ (в приближении плоского фронта)
+
+    nx : float = (xy_mean*yt_dif+x_mean*y2t_dif+xt_mean*y2y_dif)/(x_sq_mean*y_mean_sq+x_mean_sq*y_sq_mean-2*x_mean*y_mean*xy_mean+xy_mean_sq-x_sq_mean*y_sq_mean)*c_norm
+    ny : float = (xy_mean*xt_dif+y_mean*x2t_dif+yt_mean*x2x_dif)/(x_sq_mean*y_mean_sq+x_mean_sq*y_sq_mean-2*x_mean*y_mean*xy_mean+xy_mean_sq-x_sq_mean*y_sq_mean)*c_norm
+
+    nz : float = np.sqrt(1-nx**2-ny**2) # Иногда 1-nx**2-ny**2 оказывается меньше 0, что означает что в данном случае приближение плоского фронта не работает 
+
+    theta : float = np.arccos(nz)
+    phi : float = (1 - np.sign(nx))*np.pi/2 + (1 + np.sign(nx))*(1 - np.sign(ny))*np.pi/2 + np.arctan(ny/nx) # Расчёт фи с учётом четверти
+    phi_moved : float = np.radians(242) - phi
+    
+    if np.isnan(theta):
+        return (0, phi_moved)
+    else:
+        return (theta, phi_moved)
+
 # Функция ниже вычисляет хи-квадрат (отклонение данных от модифицированной модели плоского фронта)
 
 def Chi_sq(params : tuple, x0 : float, y0 : float, t: np.ndarray) -> float:
@@ -315,6 +362,45 @@ def get_PFAWTC_theta(t : np.ndarray, x0 : float, y0: float) -> np.ndarray: # Д�
 
 # Данная функция рассчитывает поверхностную плотность частиц в детекторах Ковра с учётом переходного эффекта
 def get_rho(signal : np.ndarray, time_array : np.ndarray = None, angles : np.ndarray = None) -> list[np.ndarray]:
+
+    x_cover = np.round(np.arange(-6.65, 6.66, 0.7), 2) # Координаты детекторов Ковра (м)
+    y_cover = np.round(np.arange(-6.65, 6.66, 0.7), 2) # Координаты детекторов Ковра (м)
+
+    x0, y0 = get_xy(signal) # Сначала вычисляется положение оси ливня
+    
+    if (np.any(angles)):
+        phi, theta = angles
+    else:
+        #theta, phi = get_PFAWTC_theta(time_array, x0, y0) # С учётом вычисленного положения оси получаем тета, фи
+        theta, phi = get_angles(time_array)
+
+    rho : list = []
+    r : list = [] 
+
+    for i in range(len(y_cover)):
+        for j in range(len(x_cover)):
+
+            x : float = x_cover[j]
+            y : float = y_cover[19 - i]
+            
+            # Вычисление расстояния до детектора в плоскости ливня
+            r_ij : float = np.sqrt(((x-x0)*np.sin(theta)*np.sin(phi) - (y-y0)*np.cos(theta)*np.cos(phi))**2 + ((x-x0)*np.cos(theta))**2 + ((y-y0)*np.cos(theta))**2)
+            
+            rho_ij : float = signal[i, j] / 0.49
+
+            if (r_ij > 0) and (rho_ij > 0):
+
+                rho.append(rho_ij)
+                r.append(r_ij)
+
+    r : np.ndarray = np.array(r)
+    rho : np.ndarray = np.array(rho)
+    ind : np.ndarray = np.argsort(r)
+
+    return [r[ind], rho[ind], theta]
+
+# Данная функция рассчитывает поверхностную плотность частиц в детекторах Ковра с учётом переходного эффекта
+def get_rho_k(signal : np.ndarray, time_array : np.ndarray = None, angles : np.ndarray = None) -> list[np.ndarray]:
 
     x_cover = np.round(np.arange(-6.65, 6.66, 0.7), 2) # Координаты детекторов Ковра (м)
     y_cover = np.round(np.arange(-6.65, 6.66, 0.7), 2) # Координаты детекторов Ковра (м)
