@@ -298,12 +298,12 @@ def get_angles(t : np.ndarray) -> tuple:
 
     theta : float = np.arccos(nz)
     phi : float = (1 - np.sign(nx))*np.pi/2 + (1 + np.sign(nx))*(1 - np.sign(ny))*np.pi/2 + np.arctan(ny/nx) # Расчёт фи с учётом четверти
-    phi_moved : float = np.radians(242) - phi
+    #phi_moved : float = np.radians(242) - phi
     
     if np.isnan(theta):
-        return (0, phi_moved)
+        return (0, phi)
     else:
-        return (theta, phi_moved)
+        return (theta, phi)
 
 # Функция ниже вычисляет хи-квадрат (отклонение данных от модифицированной модели плоского фронта)
 
@@ -397,7 +397,7 @@ def get_rho(signal : np.ndarray, time_array : np.ndarray = None, angles : np.nda
     rho : np.ndarray = np.array(rho)
     ind : np.ndarray = np.argsort(r)
 
-    return [r[ind], rho[ind], theta]
+    return [r[ind], rho[ind]]
 
 # Данная функция рассчитывает поверхностную плотность частиц в детекторах Ковра с учётом переходного эффекта
 def get_rho_k(signal : np.ndarray, time_array : np.ndarray = None, angles : np.ndarray = None) -> list[np.ndarray]:
@@ -523,3 +523,19 @@ def get_annealing_xy(hist : np.ndarray) -> list[float]:
         if T <= T_min: break
 
     return [y, x]  
+    
+def inout_mean_checker(hist : np.ndarray) -> bool:
+
+    perimeter_array = np.hstack((hist[0], hist[-1], hist[1:19, 0], hist[1:19, -1]))
+    inner_array = hist[1:19, 1:19]
+
+    # perimeter_mean = perimeter_array.sum() / np.max((1, np.count_nonzero(perimeter_array)))
+    # inner_mean = inner_array.sum() / np.max((1, np.count_nonzero(inner_array)))
+
+    perimeter_mean = perimeter_array.mean()
+    inner_mean = inner_array.mean()
+
+    if (perimeter_mean > inner_mean):
+        return False
+    else:
+        return True
